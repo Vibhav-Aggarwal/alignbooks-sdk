@@ -18,7 +18,7 @@ pip install alignbooks-sdk
 
 *(Note: Currently, you may need to install from source or GitHub until published to PyPI)*
 ```bash
-pip install git+https://github.com/genautollp/alignbooks-sdk.git
+pip install git+https://github.com/Vibhav-Aggarwal/alignbooks-sdk.git
 ```
 
 ## Quick Start
