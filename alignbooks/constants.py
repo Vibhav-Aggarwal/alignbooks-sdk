@@ -45,7 +45,7 @@ class VType:
     SALES_INVOICE          = 4    # Et_SalesInvoice
     DISPATCH               = 5    # Et_Dispatch (Delivery Challan)
     SALES_RETURN           = 6    # Et_SalesReturn (Credit Note)
-    SALES_CHALLAN          = 7    # Et_SalesChallan
+    SALES_CHALLAN          = 7    # Et_SalesChallan (used as Payment Receipt in example)
     ESTIMATE               = 2    # Et_Estimate
     PURCHASE_REQUISITION   = 60   # Et_PurchaseRequisition
 
@@ -54,7 +54,7 @@ class VType:
     PURCHASE_BILL          = 18   # Et_PurchaseBill
     PURCHASE_RETURN        = 19   # Et_PurchaseReturn (Debit Note)
     GOODS_RECEIPT_NOTE     = 20   # Et_GoodsReceiptNote
-    PURCHASE_CHALLAN       = 22   # Et_PurchaseChallan
+    PURCHASE_CHALLAN       = 22   # Et_PurchaseChallan (Vendor Payment in example)
 
     # ── Inventory / Stock Transfer ─────────────────────────────
     MATERIAL_ADJUSTMENT    = 35   # Et_MaterialAdjustment
@@ -69,7 +69,7 @@ class VType:
     CLOSE_JOBCARD          = 84   # Et_CloseJobcard
     MAT_ISSUE_FLOOR        = 87   # Et_IssueRequestFromProductionFloor
     MAT_ISSUE_FLOOR2       = 88   # Et_MaterialIssueToProductionFloor
-    MAT_RECEIVED_FLOOR     = 89   # Et_MaterialReceivedFromProductionFloor
+    MAT_RECEIVED_FLOOR     = 89   # Et_MaterialReceivedFromProductionFloor (daily cuts )
 
     # ── Finance ───────────────────────────────────────────────
     PAYMENT_RECEIPT        = 9    # Et_PaymentReceipt
@@ -78,23 +78,7 @@ class VType:
     DEBIT_NOTE             = 15   # Et_DebitNote
 
 
-class ExampleCompany:
-    """Example company — replace with your own AlignBooks UUIDs."""
-    ENTERPRISE_ID  = "YOUR_ENTERPRISE_ID_UUID"
-    COMPANY_ID     = "YOUR_COMPANY_ID_UUID"
-    USER_ID        = "YOUR_USER_ID_UUID"
-    BRANCH_MAIN    = "YOUR_BRANCH_ID_UUID"
-    WAREHOUSE_GEN  = "YOUR_WAREHOUSE_ID_UUID"  # "general" warehouse
-
-    # Production floor IDs
-    FLOOR_CUTTING     = "YOUR_CUTTING_FLOOR_ID_UUID"
-    FLOOR_PACKAGING   = "YOUR_PACKAGING_FLOOR_ID_UUID"
-    FLOOR_PAD_PRINT   = "YOUR_PAD_PRINT_FLOOR_ID_UUID"
-    FLOOR_SCREENING   = "YOUR_SCREENING_FLOOR_ID_UUID"
-
-
-# ── Endpoint → Service mapping (155 non-default endpoints) ──────────────────
-# All endpoints NOT listed here use Service.DATA (ABDataService.svc) by default
+# Company credentials removed — use environment variables or .env file
 SERVICE_MAP: dict[str, str] = {
     # ── ABConfigurationService.svc (58 endpoints)
     "CopyCompanyData": Service.CONFIG,

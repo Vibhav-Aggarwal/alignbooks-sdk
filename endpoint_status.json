@@ -1,7 +1,7 @@
 {
   "tested_at": "2026-02-26",
   "method": "Live testing + JS reverse engineering (main.js 24MB, 924 endpoints mapped)",
-  "company": "Example Company Pvt Ltd",
+  "company": "YourCompany",
   "stats": {
     "total_tested": 19,
     "working": 14,
@@ -51,7 +51,7 @@
         "ReturnCode": 0,
         "Message": ""
       },
-      "notes": "Proxies to messageautosender.com. Requires whatsapp_url in con_setup_general. Configure your WhatsApp credentials in con_setup_general. FASTER to call messageautosender directly.",
+      "notes": "Proxies to messageautosender.com. Requires whatsapp_url in con_setup_general. Configure your WhatsApp credentials in con_setup_general.. FASTER to call messageautosender directly.",
       "gotchas": [
         "phone_nos without + prefix",
         "Requires subscription configured in AlignBooks company setup"

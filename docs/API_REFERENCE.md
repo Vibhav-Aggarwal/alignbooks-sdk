@@ -1,6 +1,6 @@
 # AlignBooks API Reference
-> **Source:** Live testing on a production AlignBooks account + reverse-engineering AlignBooks `main.js` (24MB, 924 endpoints mapped)
-> **Date:** 2026-02-26 | **Author:** AlignBooks SDK Contributors
+> **Source:** Live testing on YourCompany account + reverse-engineering AlignBooks `main.js` (24MB, 924 endpoints mapped)
+> **Date:** 2026-02-26 | **Author:** Lala AI (Vibhav Aggarwal)
 > **Stats:** 19 endpoints tested · 14 confirmed working · 2 partial · 3 blocked
 
 ---
@@ -30,9 +30,9 @@ Every call uses an `ab_token` header — AES-256-CBC encrypted JSON:
 header_info = {
     "username":      "email@example.com",
     "password":      "Password",
-    "enterprise_id": "YOUR_ENTERPRISE_ID_UUID",
-    "company_id":    "YOUR_COMPANY_ID_UUID",
-    "user_id":       "YOUR_USER_ID_UUID",
+    "enterprise_id": "YOUR_ENTERPRISE_ID",
+    "company_id":    "YOUR_COMPANY_ID",
+    "user_id":       "YOUR_USER_ID",
     "apikey":        "YOUR_API_KEY_UUID",
     "master_type":   2037,
     "apiname":       "EndpointName",
@@ -383,7 +383,7 @@ import requests
 r = requests.post(
     "https://app.messageautosender.com/api/v1/message/create",
     json={
-        "username": "YOUR_WHATSAPP_USERNAME",
+        "username": "your_wa_username.1708@gmail.com",
         "password": "YOUR_WHATSAPP_PASSWORD",
         "to":       "919XXXXXXXXX",  # 91 + number, no +
         "body":     "Message text"
@@ -410,9 +410,9 @@ r = requests.post(
 ## Your Company Constants
 
 ```python
-COMPANY_ID    = "YOUR_COMPANY_ID_UUID"
-ENTERPRISE_ID = "YOUR_ENTERPRISE_ID_UUID"
-USER_ID       = "YOUR_USER_ID_UUID"
+COMPANY_ID    = "YOUR_COMPANY_ID"
+ENTERPRISE_ID = "YOUR_ENTERPRISE_ID"
+USER_ID       = "YOUR_USER_ID"
 ZERO_GUID     = "00000000-0000-0000-0000-000000000000"
 BRANCH_MAIN   = "YOUR_BRANCH_ID_UUID"
 WAREHOUSE_GEN = "YOUR_WAREHOUSE_ID_UUID"  # "general"
