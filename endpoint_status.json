@@ -1,7 +1,7 @@
 {
   "tested_at": "2026-02-26",
   "method": "Live testing + JS reverse engineering (main.js 24MB, 924 endpoints mapped)",
-  "company": "Genauto Gasket Technologies LLP",
+  "company": "Example Company Pvt Ltd",
   "stats": {
     "total_tested": 19,
     "working": 14,
@@ -15,7 +15,7 @@
       "service": "ABUtilityService.svc",
       "status": "working",
       "request_body": {
-        "query": "SELECT id, name FROM mst_item WHERE company_id='7e945776-...' LIMIT 10"
+        "query": "SELECT id, name FROM mst_item WHERE company_id='YOUR_COMPANY_ID_UUID' LIMIT 10"
       },
       "response_format": "list of dicts \u2014 direct MySQL rows",
       "response_sample": [
@@ -24,7 +24,7 @@
           "name": "item name"
         }
       ],
-      "notes": "MOST POWERFUL endpoint. Direct MySQL to ab007 (456 tables). MySQL syntax (LIMIT not TOP). Filter by company_id always. JOINs sometimes fail \u2014 split queries. 315K+ rows in et_stock for Genauto.",
+      "notes": "MOST POWERFUL endpoint. Direct MySQL to ab007 (456 tables). MySQL syntax (LIMIT not TOP). Filter by company_id always. JOINs sometimes fail \u2014 split queries. 315K+ rows in et_stock for example account.",
       "gotchas": [
         "SHOW TABLES returns empty \u2014 use information_schema.tables",
         "company_id filter mandatory for company-specific tables",
@@ -42,7 +42,7 @@
       "service": "ABUtilityService.svc",
       "status": "working",
       "request_body": {
-        "phone_nos": "919711707110",
+        "phone_nos": "91XXXXXXXXXX",
         "message": "Message text here",
         "attachments": []
       },
@@ -51,7 +51,7 @@
         "ReturnCode": 0,
         "Message": ""
       },
-      "notes": "Proxies to messageautosender.com. Requires whatsapp_url in con_setup_general. For Genauto: Bhuvneshverma.1708@gmail.com / B@123456. FASTER to call messageautosender directly.",
+      "notes": "Proxies to messageautosender.com. Requires whatsapp_url in con_setup_general. Configure your WhatsApp credentials in con_setup_general. FASTER to call messageautosender directly.",
       "gotchas": [
         "phone_nos without + prefix",
         "Requires subscription configured in AlignBooks company setup"
@@ -76,7 +76,7 @@
       "request_body": {
         "voucher_type": 4,
         "branch_id": "00000000-0000-0000-0000-000000000000",
-        "warehouse_id": "7f8ef6a8-d8b7-4ae0-b271-b8bbf8111319"
+        "warehouse_id": "YOUR_WAREHOUSE_ID_UUID"
       },
       "response_format": "list \u2014 [{item_id: uuid, balance: float}, ...]",
       "response_sample": {
@@ -86,7 +86,7 @@
           "balance": 690.0
         }
       },
-      "notes": "PRIMARY stock endpoint. Returns 1952 items for Genauto. warehouse_id='general' warehouse. Cross-ref item_id with mst_item for names. Negative balance = overcommitted.",
+      "notes": "PRIMARY stock endpoint. Returns 1952 items for example account. warehouse_id='general' warehouse. Cross-ref item_id with mst_item for names. Negative balance = overcommitted.",
       "gotchas": [
         "Must use actual warehouse_id \u2014 zero GUID returns empty"
       ]
@@ -154,7 +154,7 @@
           "credit_days"
         ]
       },
-      "notes": "Returns all 225 customers for Genauto."
+      "notes": "Returns all 225 customers for example account."
     },
     "ShortList_Vendor": {
       "service": "ABDataService.svc",

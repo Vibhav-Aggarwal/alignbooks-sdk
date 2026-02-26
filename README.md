@@ -16,17 +16,17 @@ from alignbooks import AlignBooksClient
 ab = AlignBooksClient(
     email="user@company.com",
     password="Password123",
-    api_key="09b71bca-...",
-    enterprise_id="73c22444-...",
-    company_id="7e945776-...",
-    user_id="0b74dd56-..."
+    api_key="YOUR_API_KEY_UUID",
+    enterprise_id="YOUR_ENTERPRISE_ID_UUID",
+    company_id="YOUR_COMPANY_ID_UUID",
+    user_id="YOUR_USER_ID_UUID"
 )
 
 # Get live stock
 stock = ab.api_call("GetItemBalanceForList", {
     "voucher_type": 4,
     "branch_id": ab.ZERO_GUID,
-    "warehouse_id": "7f8ef6a8-..."
+    "warehouse_id": "YOUR_WAREHOUSE_ID_UUID"
 })
 
 # Direct SQL (MySQL)

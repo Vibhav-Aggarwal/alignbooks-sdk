@@ -1,6 +1,6 @@
 # AlignBooks API Reference
-> **Source:** Live testing on Genauto Gasket Technologies LLP account + reverse-engineering AlignBooks `main.js` (24MB, 924 endpoints mapped)
-> **Date:** 2026-02-26 | **Author:** Lala AI (Vibhav Aggarwal)
+> **Source:** Live testing on a production AlignBooks account + reverse-engineering AlignBooks `main.js` (24MB, 924 endpoints mapped)
+> **Date:** 2026-02-26 | **Author:** AlignBooks SDK Contributors
 > **Stats:** 19 endpoints tested · 14 confirmed working · 2 partial · 3 blocked
 
 ---
@@ -30,15 +30,15 @@ Every call uses an `ab_token` header — AES-256-CBC encrypted JSON:
 header_info = {
     "username":      "email@example.com",
     "password":      "Password",
-    "enterprise_id": "73c22444-583e-4df7-a727-b26017bccf90",
-    "company_id":    "7e945776-8e74-497c-9cd7-9f32d2508052",
-    "user_id":       "0b74dd56-78cb-4a7a-94b0-30969cce39b8",
-    "apikey":        "09b71bca-e044-4d0a-9d5b-8644e6566e1d",
+    "enterprise_id": "YOUR_ENTERPRISE_ID_UUID",
+    "company_id":    "YOUR_COMPANY_ID_UUID",
+    "user_id":       "YOUR_USER_ID_UUID",
+    "apikey":        "YOUR_API_KEY_UUID",
     "master_type":   2037,
     "apiname":       "EndpointName",
     "client_date_time": "2026-02-26 15:00:00"
 }
-# Encrypt: AES-CBC, key=PBKDF2(b"01432587690321654987210543876901", salt, 100 iters), IV=random16
+# Encrypt: AES-CBC, key=PBKDF2(b"YOUR_AES_KEY_32_BYTES_HERE", salt, 100 iters), IV=random16
 # Token: base64(salt + iv + ciphertext)
 ```
 
@@ -88,7 +88,7 @@ result = api_call("QueryExecute", {
 
 **Key tables in ab007 (456 total):**
 
-| Table | Rows (Genauto) | Key Columns |
+| Table | Example Rows | Key Columns |
 |-------|---------------|-------------|
 | `mst_item` | 3,104 | id, name, code, group_id, sales_rate, purchase_rate, mrp |
 | `mst_item_group` | 22 | id, name, code, parent_id |
@@ -149,16 +149,16 @@ FROM con_setup_general WHERE company_id = '<company_id>'
 result = api_call("GetItemBalanceForList", {
     "voucher_type": 4,
     "branch_id":    "00000000-0000-0000-0000-000000000000",  # all branches
-    "warehouse_id": "7f8ef6a8-d8b7-4ae0-b271-b8bbf8111319"  # "general" warehouse
+    "warehouse_id": "YOUR_WAREHOUSE_ID_UUID"  # "general" warehouse
 })
 # → [{"item_id": "uuid", "balance": 690.0}, ...]
-# Genauto: 1,952 items returned
+# Example: 1,952 items returned
 ```
 
 **Notes:**
 - `warehouse_id` must be a real warehouse UUID — zero GUID returns empty
 - Cross-reference `item_id` with `mst_item.id` for names (or use QueryExecute JOIN)
-- Negative balance = production issued more than received (40 items in Genauto)
+- Negative balance = production issued more than received (40 items in example)
 - Faster than QueryExecute for current stock snapshot
 
 ---
@@ -181,7 +181,7 @@ result = api_call("List_Document", {
 
 **VType reference:**
 
-| VType | Name | Genauto Count |
+| VType | Name | Example Count |
 |-------|------|--------------|
 | 3 | Sales Order | 3,514 |
 | 4 | Sales Invoice | 3,460 |
@@ -211,7 +211,7 @@ result = api_call("List_Document", {
 customers = api_call("ShortList_Customer", {"new_id": "00000000-0000-0000-0000-000000000000"})
 vendors   = api_call("ShortList_Vendor",   {"new_id": "00000000-0000-0000-0000-000000000000"})
 # → [{id, name, city, phone, gstin, credit_limit, credit_days, ...}]
-# Genauto: 225 customers, 351 vendors
+# Example: 225 customers, 351 vendors
 ```
 
 ---
@@ -276,7 +276,7 @@ result = api_call("GetLogisticBulkUpdateData", {
 
 ```python
 result = api_call("SendWhatsAppMessage", {
-    "phone_nos":   "919711707110",  # without + prefix
+    "phone_nos":   "91XXXXXXXXXX",  # without + prefix
     "message":     "Message text",
     "attachments": []
 })
@@ -383,8 +383,8 @@ import requests
 r = requests.post(
     "https://app.messageautosender.com/api/v1/message/create",
     json={
-        "username": "Bhuvneshverma.1708@gmail.com",
-        "password": "B@123456",
+        "username": "YOUR_WHATSAPP_USERNAME",
+        "password": "YOUR_WHATSAPP_PASSWORD",
         "to":       "919XXXXXXXXX",  # 91 + number, no +
         "body":     "Message text"
     },
@@ -407,21 +407,21 @@ r = requests.post(
 
 ---
 
-## Genauto Constants
+## Your Company Constants
 
 ```python
-COMPANY_ID    = "7e945776-8e74-497c-9cd7-9f32d2508052"
-ENTERPRISE_ID = "73c22444-583e-4df7-a727-b26017bccf90"
-USER_ID       = "0b74dd56-78cb-4a7a-94b0-30969cce39b8"
+COMPANY_ID    = "YOUR_COMPANY_ID_UUID"
+ENTERPRISE_ID = "YOUR_ENTERPRISE_ID_UUID"
+USER_ID       = "YOUR_USER_ID_UUID"
 ZERO_GUID     = "00000000-0000-0000-0000-000000000000"
-BRANCH_MAIN   = "4bbf5139-2758-43e1-8fa4-ccf71cac8cfc"
-WAREHOUSE_GEN = "7f8ef6a8-d8b7-4ae0-b271-b8bbf8111319"  # "general"
+BRANCH_MAIN   = "YOUR_BRANCH_ID_UUID"
+WAREHOUSE_GEN = "YOUR_WAREHOUSE_ID_UUID"  # "general"
 
 # Production floors
-FLOOR_CUTTING   = "fe6a8cb2-60e7-6524-67b1-1c05223b9db4"  # daily 0001
-FLOOR_PACKAGING = "a5e6d91a-5e61-a45a-701e-e3f99d4ba74e"  # 0002
-FLOOR_PAD_PRINT = "eb3985b3-b433-b842-6cc9-b050d0a53004"  # 0003
-FLOOR_SCREENING = "511fdd1f-7dd1-b4c7-6814-5c004c44c4c1"  # 0004
+FLOOR_CUTTING   = "YOUR_CUTTING_FLOOR_ID_UUID"  # daily 0001
+FLOOR_PACKAGING = "YOUR_PACKAGING_FLOOR_ID_UUID"  # 0002
+FLOOR_PAD_PRINT = "YOUR_PAD_PRINT_FLOOR_ID_UUID"  # 0003
+FLOOR_SCREENING = "YOUR_SCREENING_FLOOR_ID_UUID"  # 0004
 ```
 
 ---
@@ -441,7 +441,7 @@ VENDOR_PAYMENT = 22; GRN           = 20
 JOBCARD            = 80
 ISSUE_TO_FLOOR     = 87
 ISSUE_TO_FLOOR_2   = 88
-RECEIVED_FROM_FLOOR= 89   # ← Genauto daily cutting records
+RECEIVED_FROM_FLOOR= 89   # ← Daily cutting floor records
 ```
 
 ---
@@ -465,7 +465,7 @@ Pulled into `alignbooks_mirror.db` (SQLite exact mirror).
 
 **Highest-value tables:**
 
-| Table | Genauto Rows | Notes |
+| Table | Example Rows | Notes |
 |-------|-------------|-------|
 | `et_stock` | **315,232** | Every stock movement since day 1 |
 | `et_stock_balance` | 33,975 | Current balance per item+branch+warehouse |
@@ -481,7 +481,7 @@ Pulled into `alignbooks_mirror.db` (SQLite exact mirror).
 
 | File | Contents |
 |------|----------|
-| `alignbooks/constants.py` | SERVICE_MAP (924 endpoints), VType enum, Genauto IDs |
+| `alignbooks/constants.py` | SERVICE_MAP (924 endpoints), VType enum, Company IDs |
 | `alignbooks/client.py` | `AlignBooksClient` — handles auth, retries, service routing |
 | `docs/API_REFERENCE.md` | This file |
 | `endpoint_status.json` | Test results: 19 tested, 14 working, 2 partial, 3 blocked |

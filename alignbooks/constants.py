@@ -12,7 +12,7 @@ ZERO_GUID = "00000000-0000-0000-0000-000000000000"
 API_BASE = "https://service.alignbooks.com"
 
 # AES encryption key (32 bytes UTF-8)
-AES_KEY = b"01432587690321654987210543876901"
+AES_KEY = b"YOUR_AES_KEY_32_BYTES_HERE"
 
 # AES IV for login response decryption (16 zero bytes)
 AES_IV_ZERO = b"\x00" * 16
@@ -45,7 +45,7 @@ class VType:
     SALES_INVOICE          = 4    # Et_SalesInvoice
     DISPATCH               = 5    # Et_Dispatch (Delivery Challan)
     SALES_RETURN           = 6    # Et_SalesReturn (Credit Note)
-    SALES_CHALLAN          = 7    # Et_SalesChallan (used as Payment Receipt in Genauto)
+    SALES_CHALLAN          = 7    # Et_SalesChallan
     ESTIMATE               = 2    # Et_Estimate
     PURCHASE_REQUISITION   = 60   # Et_PurchaseRequisition
 
@@ -54,7 +54,7 @@ class VType:
     PURCHASE_BILL          = 18   # Et_PurchaseBill
     PURCHASE_RETURN        = 19   # Et_PurchaseReturn (Debit Note)
     GOODS_RECEIPT_NOTE     = 20   # Et_GoodsReceiptNote
-    PURCHASE_CHALLAN       = 22   # Et_PurchaseChallan (Vendor Payment in Genauto)
+    PURCHASE_CHALLAN       = 22   # Et_PurchaseChallan
 
     # ── Inventory / Stock Transfer ─────────────────────────────
     MATERIAL_ADJUSTMENT    = 35   # Et_MaterialAdjustment
@@ -69,7 +69,7 @@ class VType:
     CLOSE_JOBCARD          = 84   # Et_CloseJobcard
     MAT_ISSUE_FLOOR        = 87   # Et_IssueRequestFromProductionFloor
     MAT_ISSUE_FLOOR2       = 88   # Et_MaterialIssueToProductionFloor
-    MAT_RECEIVED_FLOOR     = 89   # Et_MaterialReceivedFromProductionFloor (daily cuts @ Genauto)
+    MAT_RECEIVED_FLOOR     = 89   # Et_MaterialReceivedFromProductionFloor
 
     # ── Finance ───────────────────────────────────────────────
     PAYMENT_RECEIPT        = 9    # Et_PaymentReceipt
@@ -78,19 +78,19 @@ class VType:
     DEBIT_NOTE             = 15   # Et_DebitNote
 
 
-class GenautoCompany:
-    """Genauto Gasket Technologies LLP — AlignBooks IDs"""
-    ENTERPRISE_ID  = "73c22444-583e-4df7-a727-b26017bccf90"
-    COMPANY_ID     = "7e945776-8e74-497c-9cd7-9f32d2508052"
-    USER_ID        = "0b74dd56-78cb-4a7a-94b0-30969cce39b8"
-    BRANCH_MAIN    = "4bbf5139-2758-43e1-8fa4-ccf71cac8cfc"
-    WAREHOUSE_GEN  = "7f8ef6a8-d8b7-4ae0-b271-b8bbf8111319"  # "general" warehouse
+class ExampleCompany:
+    """Example company — replace with your own AlignBooks UUIDs."""
+    ENTERPRISE_ID  = "YOUR_ENTERPRISE_ID_UUID"
+    COMPANY_ID     = "YOUR_COMPANY_ID_UUID"
+    USER_ID        = "YOUR_USER_ID_UUID"
+    BRANCH_MAIN    = "YOUR_BRANCH_ID_UUID"
+    WAREHOUSE_GEN  = "YOUR_WAREHOUSE_ID_UUID"  # "general" warehouse
 
     # Production floor IDs
-    FLOOR_CUTTING     = "fe6a8cb2-60e7-6524-67b1-1c05223b9db4"
-    FLOOR_PACKAGING   = "a5e6d91a-5e61-a45a-701e-e3f99d4ba74e"
-    FLOOR_PAD_PRINT   = "eb3985b3-b433-b842-6cc9-b050d0a53004"
-    FLOOR_SCREENING   = "511fdd1f-7dd1-b4c7-6814-5c004c44c4c1"
+    FLOOR_CUTTING     = "YOUR_CUTTING_FLOOR_ID_UUID"
+    FLOOR_PACKAGING   = "YOUR_PACKAGING_FLOOR_ID_UUID"
+    FLOOR_PAD_PRINT   = "YOUR_PAD_PRINT_FLOOR_ID_UUID"
+    FLOOR_SCREENING   = "YOUR_SCREENING_FLOOR_ID_UUID"
 
 
 # ── Endpoint → Service mapping (155 non-default endpoints) ──────────────────
