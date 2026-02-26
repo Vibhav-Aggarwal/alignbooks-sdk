@@ -1,0 +1,328 @@
+{
+  "tested_at": "2026-02-26",
+  "method": "Live testing + JS reverse engineering (main.js 24MB, 924 endpoints mapped)",
+  "company": "Genauto Gasket Technologies LLP",
+  "stats": {
+    "total_tested": 19,
+    "working": 14,
+    "working_partial": 2,
+    "failed": 3,
+    "total_endpoints_in_alignbooks": 924,
+    "service_map_endpoints": 155
+  },
+  "endpoints": {
+    "QueryExecute": {
+      "service": "ABUtilityService.svc",
+      "status": "working",
+      "request_body": {
+        "query": "SELECT id, name FROM mst_item WHERE company_id='7e945776-...' LIMIT 10"
+      },
+      "response_format": "list of dicts \u2014 direct MySQL rows",
+      "response_sample": [
+        {
+          "id": "uuid",
+          "name": "item name"
+        }
+      ],
+      "notes": "MOST POWERFUL endpoint. Direct MySQL to ab007 (456 tables). MySQL syntax (LIMIT not TOP). Filter by company_id always. JOINs sometimes fail \u2014 split queries. 315K+ rows in et_stock for Genauto.",
+      "gotchas": [
+        "SHOW TABLES returns empty \u2014 use information_schema.tables",
+        "company_id filter mandatory for company-specific tables",
+        "No Result response = empty table (RC 0 but empty list)"
+      ],
+      "verified_queries": [
+        "SELECT table_name FROM information_schema.tables WHERE table_schema='ab007'",
+        "SELECT * FROM mst_item WHERE company_id='...' LIMIT 10",
+        "SELECT COUNT(*) as cnt FROM tr_bom WHERE company_id='...'",
+        "SELECT * FROM et_stock_balance WHERE company_id='...'",
+        "SELECT * FROM tr_production_floor_material WHERE company_id='...' ORDER BY vdate DESC"
+      ]
+    },
+    "SendWhatsAppMessage": {
+      "service": "ABUtilityService.svc",
+      "status": "working",
+      "request_body": {
+        "phone_nos": "919711707110",
+        "message": "Message text here",
+        "attachments": []
+      },
+      "response_format": "dict with ReturnCode 0 on success",
+      "response_sample": {
+        "ReturnCode": 0,
+        "Message": ""
+      },
+      "notes": "Proxies to messageautosender.com. Requires whatsapp_url in con_setup_general. For Genauto: Bhuvneshverma.1708@gmail.com / B@123456. FASTER to call messageautosender directly.",
+      "gotchas": [
+        "phone_nos without + prefix",
+        "Requires subscription configured in AlignBooks company setup"
+      ]
+    },
+    "GetDocumentPrint": {
+      "service": "ABUtilityService.svc",
+      "status": "working",
+      "request_body": {
+        "voucher_id": "<invoice_uuid>",
+        "vtype": 18,
+        "format_id": "33d35889-1871-11ed-a132-005056a578c5",
+        "digital_signature_selected": false,
+        "copies": 1
+      },
+      "response_format": "dict \u2014 DocumentFile is list of ints (byte array)",
+      "notes": "PDF as byte array. Convert: bytes(response['DocumentFile']). Works for VType 18 (Purchase Bill). format_id = first print format returned by GetPrintFormatList."
+    },
+    "GetItemBalanceForList": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": {
+        "voucher_type": 4,
+        "branch_id": "00000000-0000-0000-0000-000000000000",
+        "warehouse_id": "7f8ef6a8-d8b7-4ae0-b271-b8bbf8111319"
+      },
+      "response_format": "list \u2014 [{item_id: uuid, balance: float}, ...]",
+      "response_sample": {
+        "count": 1952,
+        "sample": {
+          "item_id": "uuid",
+          "balance": 690.0
+        }
+      },
+      "notes": "PRIMARY stock endpoint. Returns 1952 items for Genauto. warehouse_id='general' warehouse. Cross-ref item_id with mst_item for names. Negative balance = overcommitted.",
+      "gotchas": [
+        "Must use actual warehouse_id \u2014 zero GUID returns empty"
+      ]
+    },
+    "List_Document": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": {
+        "info": {
+          "master_id": "",
+          "branch_id": "00000000-0000-0000-0000-000000000000",
+          "from_date": "2025-04-01",
+          "to_date": "2026-02-26",
+          "master_type": 4
+        }
+      },
+      "response_format": "list of transaction headers",
+      "response_sample": {
+        "count_by_vtype": {
+          "3": 3514,
+          "4": 3460,
+          "5": 41,
+          "16": 394,
+          "18": 1883,
+          "19": 10,
+          "7": 3137,
+          "22": 1581,
+          "80": 1,
+          "87": 3670
+        }
+      },
+      "notes": "Workhorse for all transaction lists. server ignores date filters sometimes \u2014 filter client-side. Returns headers only (no line items).",
+      "vtypes": {
+        "3": "Sales Order",
+        "4": "Sales Invoice",
+        "5": "Dispatch",
+        "6": "Sales Return",
+        "7": "Customer Receipt (Payment)",
+        "16": "Purchase Order",
+        "18": "Purchase Bill",
+        "19": "Purchase Return",
+        "22": "Vendor Payment",
+        "80": "Jobcard",
+        "87": "Issue to Production Floor",
+        "88": "Material Issue to Floor v2",
+        "89": "Material Received from Floor (daily cutting records)"
+      }
+    },
+    "ShortList_Customer": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": {
+        "new_id": "00000000-0000-0000-0000-000000000000"
+      },
+      "response_format": "list \u2014 [{id, name, city, phone, gstin, ...}]",
+      "response_sample": {
+        "count": 225,
+        "sample_keys": [
+          "id",
+          "name",
+          "city",
+          "phone",
+          "gstin",
+          "credit_limit",
+          "credit_days"
+        ]
+      },
+      "notes": "Returns all 225 customers for Genauto."
+    },
+    "ShortList_Vendor": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": {
+        "new_id": "00000000-0000-0000-0000-000000000000"
+      },
+      "response_format": "list \u2014 [{id, name, city, phone, gstin, ...}]",
+      "response_sample": {
+        "count": 351
+      },
+      "notes": "Returns all 351 vendors."
+    },
+    "Display_Invoice": {
+      "service": "ABDataService.svc",
+      "status": "working_partial",
+      "request_body": {
+        "id": "<invoice_uuid>",
+        "vtype": 18
+      },
+      "response_format": "full invoice object with line items + tax",
+      "notes": "Works for VType 18 (Purchase Bill). FAILS for VType 4 (Sales Invoice) \u2014 'No rights'. Use for purchase bill detail only.",
+      "gotchas": [
+        "VType 4 Sales Invoice returns RC 5000 No rights"
+      ]
+    },
+    "GetItemAnalysis": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": {
+        "item_id": "<item_uuid>",
+        "vdate": "2026-02-26"
+      },
+      "response_format": "list \u2014 item movement analysis",
+      "notes": "Per-item sales/purchase analysis as of vdate."
+    },
+    "GetMovedOnlyStock": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": {
+        "from_date": "2026-02-01",
+        "to_date": "2026-02-26"
+      },
+      "response_format": "list \u2014 items with stock movement in date range",
+      "notes": "Items that moved (bought/sold/transferred) in period."
+    },
+    "GetLogisticBulkUpdateData": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": {
+        "VType": 5,
+        "from_date": "2026-01-01",
+        "to_date": "2026-02-26"
+      },
+      "response_format": "list \u2014 dispatches with courier, AWB, status",
+      "notes": "Shipping/courier tracking. VType 5 = Dispatch."
+    },
+    "Display_ProductionFloorMaterial": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": {
+        "id": "<production_entry_uuid>",
+        "vtype": 89
+      },
+      "response_format": "full production entry with material line items",
+      "notes": "Detail for one production floor entry. VType 89 = daily cutting records."
+    },
+    "SaveUpdate_Order": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": {
+        "is_new_mode": true,
+        "vtype": 16,
+        "info": {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "vtype": 16,
+          "party": {
+            "id": "<vendor_uuid>"
+          },
+          "vdate": "2026-02-26 00:00:00",
+          "voucher_number": {
+            "digits": 0,
+            "num": 0,
+            "prefix": "GG",
+            "suffix": "",
+            "vno": ""
+          },
+          "currency": "INR",
+          "send_for_approval": false,
+          "is_import_mode": false,
+          "document_history_detail": [],
+          "udf_list": [],
+          "item_list": [
+            {
+              "item": {
+                "id": "<item_uuid>"
+              },
+              "unit": {
+                "id": "<unit_uuid>"
+              },
+              "qty": 100,
+              "rate": 50.0,
+              "amount": 5000.0
+            }
+          ]
+        }
+      },
+      "response_format": "dict with ReturnCode 0 + new voucher ID",
+      "notes": "Create Purchase Order (VType 16). Working template: create_kc_po.py",
+      "gotchas": [
+        "send_for_approval MUST be False (not None)",
+        "document_history_detail MUST be [] (not None)",
+        "voucher_number.suffix MUST be '' (not None)",
+        "VType 16 not 14"
+      ]
+    },
+    "SaveUpdate_Invoice": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": "see create_purchase_bill.py \u2014 payload key is 'invoice' not 'info'",
+      "notes": "VType 18 = Purchase Bill. Key: payload['invoice'] not payload['info']. Clone from Display_Invoice of existing bill.",
+      "gotchas": [
+        "Payload key MUST be 'invoice' not 'info'"
+      ]
+    },
+    "LoginUser": {
+      "service": "ABDataService.svc",
+      "status": "working",
+      "request_body": {
+        "login_id": "email@company.com",
+        "password": "pass"
+      },
+      "response_format": "encrypted AES response \u2014 decrypt with AES_KEY + IV",
+      "notes": "Required before Display_* calls. ab_token auth handles this automatically."
+    },
+    "Display_CompanySetup": {
+      "service": "ABConfigurationService.svc",
+      "status": "working_partial",
+      "request_body": {},
+      "response_format": "nested company config object",
+      "notes": "Returns company setup including GeneralSetup.whatsapp_url. Sometimes returns None \u2014 use QueryExecute on con_setup_general instead.",
+      "gotchas": [
+        "May return None \u2014 fallback to SQL: SELECT * FROM con_setup_general WHERE company_id='...'"
+      ]
+    },
+    "Display_Invoice_VType4": {
+      "service": "ABDataService.svc",
+      "status": "failed",
+      "request_body": {
+        "id": "<uuid>",
+        "vtype": 4
+      },
+      "error": "RC 5000: No rights to access Sales Invoice detail",
+      "notes": "Sales invoice line items inaccessible via API. Use et_stock VType 4 via QueryExecute instead."
+    },
+    "GetReportFilter": {
+      "service": "ABReportService.svc",
+      "status": "failed",
+      "request_body": {
+        "report_type": "StockSummary"
+      },
+      "error": "RC 5002: Invalid Input \u2014 correct report_type values unknown",
+      "notes": "Stock reports via API not accessible. Use QueryExecute on et_stock_balance instead."
+    },
+    "GetStockStatementForBank": {
+      "service": "ABReportService.svc",
+      "status": "not_useful",
+      "notes": "Returns PDF byte array (DocumentFile), not JSON. For bank stock statement PDF only."
+    }
+  }
+}

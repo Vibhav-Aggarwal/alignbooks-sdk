@@ -1,112 +1,80 @@
 # AlignBooks Python SDK
 
-![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-
-An **unofficial, reverse-engineered** Python SDK for the [AlignBooks](https://alignbooks.com/) Accounting and ERP API. 
-
-AlignBooks does not provide an official public SDK. This library wraps their internal WCF services, handling AES encryption, `ab_token` generation, session management, and endpoint mappings to give you a clean, Pythonic interface.
-
-## Disclaimer
-> **This is an unofficial project.** We are not affiliated with, endorsed by, or sponsored by Align Info Solutions Pvt. Ltd. This SDK relies on reverse-engineered API endpoints which may change without notice. Use in production at your own risk.
+Reverse-engineered Python client for AlignBooks ERP API.
 
 ## Installation
 
-```bash
-pip install alignbooks-sdk
-```
-
-*(Note: Currently, you may need to install from source or GitHub until published to PyPI)*
 ```bash
 pip install git+https://github.com/Vibhav-Aggarwal/alignbooks-sdk.git
 ```
 
 ## Quick Start
 
-You'll need your AlignBooks credentials, including the hidden `api_key`, `enterprise_id`, `company_id`, and `user_id`. (These can be extracted by inspecting the network traffic in the AlignBooks web app).
-
 ```python
-from alignbooks import AlignBooks
+from alignbooks import AlignBooksClient
 
-ab = AlignBooks(
-    email="user@example.com",
-    password="your-password",
-    api_key="your-api-key",
-    enterprise_id="your-enterprise-id",
-    company_id="your-company-id",
-    user_id="your-user-id"
+ab = AlignBooksClient(
+    email="user@company.com",
+    password="Password123",
+    api_key="09b71bca-...",
+    enterprise_id="73c22444-...",
+    company_id="7e945776-...",
+    user_id="0b74dd56-..."
 )
 
-# Auto-login happens on the first call
-vendors = ab.vendors.list()
-for vendor in vendors:
-    print(f"Vendor: {vendor['name']} (ID: {vendor['id']})")
+# Get live stock
+stock = ab.api_call("GetItemBalanceForList", {
+    "voucher_type": 4,
+    "branch_id": ab.ZERO_GUID,
+    "warehouse_id": "7f8ef6a8-..."
+})
+
+# Direct SQL (MySQL)
+items = ab.api_call("QueryExecute", {
+    "query": "SELECT id, name FROM mst_item WHERE company_id='...' LIMIT 10"
+})
+
+# Send WhatsApp
+ab.api_call("SendWhatsAppMessage", {
+    "phone_nos": "919XXXXXXXXX",
+    "message":   "Hello from AlignBooks",
+    "attachments": []
+})
 ```
 
 ## API Reference
 
-The SDK is organized into service modules accessible as properties on the main client.
+See [docs/API_REFERENCE.md](docs/API_REFERENCE.md) for confirmed working endpoints.
 
-### Masters (Vendors, Customers, Items, Ledgers)
+## Discovery
 
-```python
-# List items
-items = ab.items.list()
+**924 endpoints** extracted from AlignBooks web app `main.js`:
+- 769 on `ABDataService.svc` (default)
+- 32 on `ABUtilityService.svc` (SQL, WhatsApp, PDF)
+- 58 on `ABConfigurationService.svc` (company setup)
+- 31 on `ABReportService.svc` (GST, reports)
+- 23 on `ABEnterpriseService.svc` (multi-company)
+- 11 on `ABImportService.svc` (Excel, WhatsApp setup)
 
-# Get a specific customer
-customer = ab.customers.get("customer-guid")
+Full service map in `alignbooks/constants.py` → `SERVICE_MAP`.
 
-# Create a new vendor
-new_vendor = ab.vendors.create({
-    "name": "Test Vendor",
-    "gst_no": "06XXXXX...",
-    "state": {"id": "state-guid"}
-})
-```
+## Key Endpoints
 
-### Documents (Invoices, Bills, Orders)
+| Endpoint | What it does |
+|----------|-------------|
+| `QueryExecute` | Direct MySQL queries to ab007 DB |
+| `GetItemBalanceForList` | Live stock levels |
+| `List_Document` | Transaction lists (invoices, POs, etc.) |
+| `ShortList_Customer` | Customer master |
+| `ShortList_Vendor` | Vendor master |
+| `SendWhatsAppMessage` | Send WhatsApp via configured API |
+| `GetDocumentPrint` | Get document as PDF byte array |
+| `SaveUpdate_Order` | Create Purchase Order |
+| `SaveUpdate_Invoice` | Create Sales Invoice |
 
-```python
-from alignbooks.constants import VType
+## Auth
 
-# List Purchase Bills
-bills = ab.purchase.list_bills(from_date="2026-01-01", to_date="2026-02-24")
+All calls use `ab_token` header (AES-256-CBC encrypted JSON with credentials + timestamp).
+Auto-handled by `AlignBooksClient.api_call()`.
 
-# Delete a document
-ab.documents.delete("document-guid", vtype=VType.PURCHASE_BILL)
-
-# Download PDF
-pdf_bytes, filename = ab.documents.get_pdf("document-guid", vtype=VType.PURCHASE_BILL)
-with open(filename, "wb") as f:
-    f.write(pdf_bytes)
-```
-
-## Examples
-
-Check the `examples/` directory in this repository for full scripts, including:
-- Creating a Purchase Order
-- Creating a Purchase Bill with taxes
-- Generating PDFs
-- Managing Authentication
-
-## Configuration via Environment Variables
-
-It's highly recommended to use environment variables for your credentials. You can use a `.env` file:
-
-```env
-AB_EMAIL=user@example.com
-AB_PASSWORD=your-password
-AB_API_KEY=09b71bca-...
-AB_ENTERPRISE_ID=73c22444-...
-AB_COMPANY_ID=7e945776-...
-AB_USER_ID=0b74dd56-...
-```
-
-## Reverse Engineering Notes
-- AlignBooks uses PBKDF2 with an AES-256-CBC cipher to encrypt an auth payload containing your session and API keys into an `ab_token` header.
-- Endpoint naming generally follows `SaveUpdate_MasterName` and `ShortList_MasterName`.
-- When creating transactions, note the JSON key required varies by VType (e.g. `SaveUpdate_Invoice` requires `"invoice"`, `SaveUpdate_Order` requires `"info"`).
-
-## License
-
-MIT License. See [LICENSE](LICENSE) for more information.
+See `alignbooks/auth.py` for encryption details.

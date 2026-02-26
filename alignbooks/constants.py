@@ -1,6 +1,11 @@
-"""Constants for AlignBooks SDK."""
+"""
+AlignBooks SDK Constants
+Full service mapping extracted from AlignBooks web app main.js (2026-02-26)
+924 endpoints discovered. Default service: ABDataService.svc (769 endpoints)
+Non-default service endpoints (155) are mapped explicitly below.
+"""
 
-# Zero GUID used for new records
+# Zero GUID used for new records / "all" filters
 ZERO_GUID = "00000000-0000-0000-0000-000000000000"
 
 # API Base URL
@@ -21,102 +26,126 @@ DEFAULT_MASTER_TYPE = 2037
 
 
 class Service:
-    """Service URL suffixes."""
-    DATA = "ABDataService.svc"
-    UTILITY = "ABUtilityService.svc"
-    CONFIG = "ABConfigurationService.svc"
-    REPORT = "ABReportService.svc"
-    IMPORT = "ABImportService.svc"
-    ENTERPRISE = "ABEnterpriseService.svc"
+    """Service URL suffixes (append to https://service.alignbooks.com/)"""
+    DATA          = "ABDataService.svc"          # Default — 769 endpoints
+    UTILITY       = "ABUtilityService.svc"        # 32 endpoints (reports, WA, SQL)
+    CONFIG        = "ABConfigurationService.svc"  # 58 endpoints (company setup)
+    REPORT        = "ABReportService.svc"         # 31 endpoints (PDF reports, GST)
+    IMPORT        = "ABImportService.svc"         # 11 endpoints (Excel, WhatsApp setup)
+    ENTERPRISE    = "ABEnterpriseService.svc"     # 23 endpoints (multi-company)
 
 
-# Endpoint → Service mapping for non-default services
-# Default is ABDataService
+class VType:
+    """
+    AlignBooks Voucher Types (Et_* enum from ABMenuMaster).
+    Pass as master_type in List_Document, Display_Invoice, etc.
+    """
+    # ── Sales ─────────────────────────────────────────────────
+    SALES_ORDER            = 3    # Et_SalesOrder
+    SALES_INVOICE          = 4    # Et_SalesInvoice
+    DISPATCH               = 5    # Et_Dispatch (Delivery Challan)
+    SALES_RETURN           = 6    # Et_SalesReturn (Credit Note)
+    SALES_CHALLAN          = 7    # Et_SalesChallan (used as Payment Receipt in Genauto)
+    ESTIMATE               = 2    # Et_Estimate
+    PURCHASE_REQUISITION   = 60   # Et_PurchaseRequisition
+
+    # ── Purchase ──────────────────────────────────────────────
+    PURCHASE_ORDER         = 16   # Et_PurchaseOrder
+    PURCHASE_BILL          = 18   # Et_PurchaseBill
+    PURCHASE_RETURN        = 19   # Et_PurchaseReturn (Debit Note)
+    GOODS_RECEIPT_NOTE     = 20   # Et_GoodsReceiptNote
+    PURCHASE_CHALLAN       = 22   # Et_PurchaseChallan (Vendor Payment in Genauto)
+
+    # ── Inventory / Stock Transfer ─────────────────────────────
+    MATERIAL_ADJUSTMENT    = 35   # Et_MaterialAdjustment
+    INTER_BRANCH           = 38   # Et_InterBranch (Stock Transfer)
+    JOBWORK_OUTWARD        = 48   # Et_JobWorkOutwardInvoice
+    JOBWORK_INWARD         = 79   # Et_JobWorkInwardInvoice
+
+    # ── Production ────────────────────────────────────────────
+    JOBCARD                = 80   # Et_Jobcard
+    MAT_ISSUE_JOBCARD      = 81   # Et_MaterialIssueAgainstJobcard
+    MAT_RECEIVED_JOBCARD   = 82   # Et_MaterialReceivedAgainstJobcard
+    CLOSE_JOBCARD          = 84   # Et_CloseJobcard
+    MAT_ISSUE_FLOOR        = 87   # Et_IssueRequestFromProductionFloor
+    MAT_ISSUE_FLOOR2       = 88   # Et_MaterialIssueToProductionFloor
+    MAT_RECEIVED_FLOOR     = 89   # Et_MaterialReceivedFromProductionFloor (daily cuts @ Genauto)
+
+    # ── Finance ───────────────────────────────────────────────
+    PAYMENT_RECEIPT        = 9    # Et_PaymentReceipt
+    JOURNAL                = 10   # Et_JournalVoucher
+    CREDIT_NOTE            = 14   # Et_CreditNote
+    DEBIT_NOTE             = 15   # Et_DebitNote
+
+
+class GenautoCompany:
+    """Genauto Gasket Technologies LLP — AlignBooks IDs"""
+    ENTERPRISE_ID  = "73c22444-583e-4df7-a727-b26017bccf90"
+    COMPANY_ID     = "7e945776-8e74-497c-9cd7-9f32d2508052"
+    USER_ID        = "0b74dd56-78cb-4a7a-94b0-30969cce39b8"
+    BRANCH_MAIN    = "4bbf5139-2758-43e1-8fa4-ccf71cac8cfc"
+    WAREHOUSE_GEN  = "7f8ef6a8-d8b7-4ae0-b271-b8bbf8111319"  # "general" warehouse
+
+    # Production floor IDs
+    FLOOR_CUTTING     = "fe6a8cb2-60e7-6524-67b1-1c05223b9db4"
+    FLOOR_PACKAGING   = "a5e6d91a-5e61-a45a-701e-e3f99d4ba74e"
+    FLOOR_PAD_PRINT   = "eb3985b3-b433-b842-6cc9-b050d0a53004"
+    FLOOR_SCREENING   = "511fdd1f-7dd1-b4c7-6814-5c004c44c4c1"
+
+
+# ── Endpoint → Service mapping (155 non-default endpoints) ──────────────────
+# All endpoints NOT listed here use Service.DATA (ABDataService.svc) by default
 SERVICE_MAP: dict[str, str] = {
-    # Utility
-    "GetDocumentPrint": Service.UTILITY,
-    "GetDocumentURLInfo": Service.UTILITY,
-    "GetPrintFormatList": Service.UTILITY,  # Note: also exists on DataService
-    "GetCompleteCurrencyList": Service.UTILITY,
-    "GetCompanySelectionList": Service.UTILITY,
-    "GetFinancialPeriodList": Service.UTILITY,
-    "GetVoucherNumber": Service.UTILITY,
-    "GetMasterCode": Service.UTILITY,
-    "GetLinkageParent": Service.UTILITY,
-    "GetSampleDocumentPreview": Service.UTILITY,
-    "GetVideoLink": Service.UTILITY,
-    "GetDataForQuery": Service.UTILITY,
-    "GetFilterForQuery": Service.UTILITY,
-    "ChangePassword": Service.UTILITY,
-    "ValidatePasswordPolicy": Service.UTILITY,
-    "SendVoucherEmail": Service.UTILITY,
-    "SendVoucherSMS": Service.UTILITY,
-    "SendVoucherMailLink": Service.UTILITY,
-    "SendWhatsAppMessage": Service.UTILITY,
-    "SendReport": Service.UTILITY,
-    "SendForgotPasswordOTP": Service.UTILITY,
-    "ResetCompanyStatic": Service.UTILITY,
-    "UpdateDefaultCompany": Service.UTILITY,
-    "UpdateCustomerRemark": Service.UTILITY,
-    "QueryExecute": Service.UTILITY,
-    "SaveFavouriteMenu": Service.UTILITY,
-    "DeleteFavouriteMenu": Service.UTILITY,
-    "GetFavouriteMenu": Service.UTILITY,
-    "ContactManagementSendEmailSMS": Service.UTILITY,
-    "PickPackSendEmailSMS": Service.UTILITY,
-    "ResendCommunication": Service.UTILITY,
-    "ICICINewAccountRequest": Service.UTILITY,
-    "TextToSpeech": Service.UTILITY,
-    # Configuration
-    "Display_CompanySetup": Service.CONFIG,
+    # ── ABConfigurationService.svc (58 endpoints)
+    "CopyCompanyData": Service.CONFIG,
+    "DeleteUserMenuRights": Service.CONFIG,
+    "DisplayAuthoriseCompanyToPullData": Service.CONFIG,
+    "DisplayUserMenuRights": Service.CONFIG,
     "Display_CompanyImage": Service.CONFIG,
+    "Display_CompanySetup": Service.CONFIG,
     "Display_DashboardConfiguration": Service.CONFIG,
+    "Display_DigitalSignatureSetup": Service.CONFIG,
+    "Display_DocumentApprovalSetup": Service.CONFIG,
     "Display_DocumentGeneralSetup": Service.CONFIG,
     "Display_DocumentNumberingSetup": Service.CONFIG,
-    "Display_DocumentApprovalSetup": Service.CONFIG,
     "Display_EmailSMSSetup": Service.CONFIG,
-    "Display_PrintConfiguration": Service.CONFIG,
-    "Display_UserPermission": Service.CONFIG,
-    "Display_DigitalSignatureSetup": Service.CONFIG,
-    "Display_ScheduleConfiguration": Service.CONFIG,
-    "Display_Integration_Config": Service.CONFIG,
-    "Display_MasterApprovalConfiguration": Service.CONFIG,
+    "Display_GhanaTaxcodeMapping": Service.CONFIG,
     "Display_HROtherSetup": Service.CONFIG,
     "Display_HROvertimeSetup": Service.CONFIG,
     "Display_HRPerquisiteSetup": Service.CONFIG,
     "Display_HRSalarySetup": Service.CONFIG,
     "Display_HRStatutorySetup": Service.CONFIG,
-    "Display_GhanaTaxcodeMapping": Service.CONFIG,
-    "DisplayAuthoriseCompanyToPullData": Service.CONFIG,
-    "DisplayUserMenuRights": Service.CONFIG,
+    "Display_Integration_Config": Service.CONFIG,
+    "Display_MasterApprovalConfiguration": Service.CONFIG,
+    "Display_PrintConfiguration": Service.CONFIG,
+    "Display_ScheduleConfiguration": Service.CONFIG,
+    "Display_UserPermission": Service.CONFIG,
     "GetCompaniesListofEnterprise": Service.CONFIG,
     "GetDashboardConfig": Service.CONFIG,
     "GetObjectRights": Service.CONFIG,
     "GetPasswordPolicy": Service.CONFIG,
+    "SaveAuthoriseCompanyToPullData": Service.CONFIG,
+    "SaveChildCompanyVsCustomerMapping": Service.CONFIG,
+    "SaveDocumentApprovalConfiguration": Service.CONFIG,
+    "SaveEmail_SMSConfiguration": Service.CONFIG,
+    "SaveUnmappedItemAccrossCompany": Service.CONFIG,
     "SaveUpdate_DashboardConfiguration": Service.CONFIG,
+    "SaveUpdate_DigitalSignatureSetup": Service.CONFIG,
     "SaveUpdate_DocumentGeneralSetup": Service.CONFIG,
     "SaveUpdate_DocumentNumberingSetup": Service.CONFIG,
-    "SaveUpdate_PrintConfiguration": Service.CONFIG,
-    "SaveUpdate_UserPermission": Service.CONFIG,
-    "SaveUpdate_DigitalSignatureSetup": Service.CONFIG,
-    "SaveUpdate_ScheduleConfiguration": Service.CONFIG,
-    "SaveUpdate_Integration_Config": Service.CONFIG,
     "SaveUpdate_HROtherSetup": Service.CONFIG,
     "SaveUpdate_HROvertimeSetup": Service.CONFIG,
     "SaveUpdate_HRPerquisiteSetup": Service.CONFIG,
     "SaveUpdate_HRSalarySetup": Service.CONFIG,
     "SaveUpdate_HRStatutorySetup": Service.CONFIG,
-    "SaveDocumentApprovalConfiguration": Service.CONFIG,
-    "SaveEmail_SMSConfiguration": Service.CONFIG,
+    "SaveUpdate_Integration_Config": Service.CONFIG,
+    "SaveUpdate_PrintConfiguration": Service.CONFIG,
+    "SaveUpdate_ScheduleConfiguration": Service.CONFIG,
+    "SaveUpdate_UserPermission": Service.CONFIG,
     "SaveUserMenuRights": Service.CONFIG,
-    "SaveAuthoriseCompanyToPullData": Service.CONFIG,
-    "SaveChildCompanyVsCustomerMapping": Service.CONFIG,
-    "SaveUnmappedItemAccrossCompany": Service.CONFIG,
     "Save_ApprovalAdvancement": Service.CONFIG,
     "Save_GhanaTaxcodeMapping": Service.CONFIG,
     "Save_MasterApprovalConfiguration": Service.CONFIG,
-    "DeleteUserMenuRights": Service.CONFIG,
-    "CopyCompanyData": Service.CONFIG,
     "Update_CompanyBasicSetup": Service.CONFIG,
     "Update_CompanyFinanceSetup": Service.CONFIG,
     "Update_CompanyGeneralSetup": Service.CONFIG,
@@ -126,195 +155,147 @@ SERVICE_MAP: dict[str, str] = {
     "Update_CompanySalesSetup": Service.CONFIG,
     "Update_DefaultGL": Service.CONFIG,
     "Update_Integration_ConfigStatus": Service.CONFIG,
-    # Report
-    "GetReportData": Service.REPORT,
-    "GetReportFilter": Service.REPORT,
-    "GetReportView": Service.REPORT,
-    "GetReportPrintPDF": Service.REPORT,
-    "GetReportPrintExportDetailToExcel": Service.REPORT,
-    "GetReportPrintExportDetailToNotepad": Service.REPORT,
-    "GetUserReportColumn": Service.REPORT,
-    "GetCalculativeColumns": Service.REPORT,
-    "GetFavouriteReportMenu": Service.REPORT,
-    "GetGSTR1Json": Service.REPORT,
-    "GetGSTR3B": Service.REPORT,
-    "GetGSTR3BJson": Service.REPORT,
-    "GetGSTR4Json": Service.REPORT,
-    "GetGSTR9Json": Service.REPORT,
-    "GetVATReturn_MiddleEastJson": Service.REPORT,
-    "GetStockStatementForBank": Service.REPORT,
-    "GetVoucerListForFilter": Service.REPORT,
-    "DisplayCustomReport": Service.REPORT,
-    "ListReportView": Service.REPORT,
-    "SaveCustomReport": Service.REPORT,
-    "SaveReportInFavourite": Service.REPORT,
-    "SaveUserReportColumn": Service.REPORT,
-    "SaveUserReportCalculativeColumn": Service.REPORT,
-    "SetAsDefaultView": Service.REPORT,
+
+    # ── ABEnterpriseService.svc (23 endpoints)
+    "ABCRM_IVR_ClickToCall": Service.ENTERPRISE,
+    "CRMTrn_GetTopicForTrainingFeedback": Service.ENTERPRISE,
+    "CRMTrn_SaveTrainingFeedback": Service.ENTERPRISE,
+    "CreateCompany": Service.ENTERPRISE,
+    "CreateGuestUser": Service.ENTERPRISE,
+    "DeleteCompany": Service.ENTERPRISE,
+    "GetCRMReport": Service.ENTERPRISE,
+    "GetClientListForUser": Service.ENTERPRISE,
+    "GetLicenseInfoForEnterprise": Service.ENTERPRISE,
+    "GetSubscriptionInfo": Service.ENTERPRISE,
+    "IVR_ClickToCall": Service.ENTERPRISE,
+    "InAppFeedbackFromMobile": Service.ENTERPRISE,
+    "ListSalesPartner": Service.ENTERPRISE,
+    "ProcessURL": Service.ENTERPRISE,
+    "SaveLicenseOrder": Service.ENTERPRISE,
+    "Save_Survey": Service.ENTERPRISE,
+    "UpdateEnterpriseOffer": Service.ENTERPRISE,
+    "UpdateLicenseOrderStatus": Service.ENTERPRISE,
+    "UpdateUserProfile": Service.ENTERPRISE,
+    "ValidateGuestUserInCompany": Service.ENTERPRISE,
+    "ValidateURL": Service.ENTERPRISE,
+    "VerifyUniqueUser": Service.ENTERPRISE,
+    "support_SaveSupportTicket": Service.ENTERPRISE,
+
+    # ── ABImportService.svc (11 endpoints)
+    "Delete_ExcelColumnMapping": Service.IMPORT,
+    "Display_ExcelColumnMapping": Service.IMPORT,
+    "ExportVoucherToExcel": Service.IMPORT,
+    "GetIPAddress": Service.IMPORT,
+    "ImportFromSAP": Service.IMPORT,
+    "Import_Master": Service.IMPORT,
+    "Save_ExcelColumnMapping": Service.IMPORT,
+    "WhatsAppWeb_MobileLinkage": Service.IMPORT,
+    "WhatsAppWeb_PurchasePlan": Service.IMPORT,
+    "WhatsAppWeb_Register": Service.IMPORT,
+    "WhatsAppWeb_StatusChecking": Service.IMPORT,
+
+    # ── ABReportService.svc (31 endpoints)
     "DeleteReportFromFavourite": Service.REPORT,
     "DeleteView": Service.REPORT,
+    "DisplayCustomReport": Service.REPORT,
     "DownloadEInvoiceJson": Service.REPORT,
     "DownloadEWayBillJson": Service.REPORT,
     "DownloadFTAVATAuditFile": Service.REPORT,
     "GenerateLoanAccountConfirmation": Service.REPORT,
-    "GenerateOTPGSTR1": Service.REPORT,
+    "GenerateOTPGSTR": Service.REPORT,
     "GeneratePartyAccountConfirmation": Service.REPORT,
     "GeneratePaySlip": Service.REPORT,
     "GeneratePaymentReminder": Service.REPORT,
-    "UploadGSTR1": Service.REPORT,
-    # Import
-    "SaveExternal_Invoice": Service.IMPORT,
-    "Import_Master": Service.IMPORT,
-    "ImportFromSAP": Service.IMPORT,
-    "ExportVoucherToExcel": Service.IMPORT,
-    "Display_ExcelColumnMapping": Service.IMPORT,
-    "Save_ExcelColumnMapping": Service.IMPORT,
-    "Delete_ExcelColumnMapping": Service.IMPORT,
-    "GetIPAddress": Service.IMPORT,
-    "WhatsAppWeb_Register": Service.IMPORT,
-    "WhatsAppWeb_StatusChecking": Service.IMPORT,
-    "WhatsAppWeb_MobileLinkage": Service.IMPORT,
-    "WhatsAppWeb_PurchasePlan": Service.IMPORT,
-    # Enterprise
-    "CreateCompany": Service.ENTERPRISE,
-    "DeleteCompany": Service.ENTERPRISE,
-    "CreateGuestUser": Service.ENTERPRISE,
-    "GetClientListForUser": Service.ENTERPRISE,
-    "GetLicenseInfoForEnterprise": Service.ENTERPRISE,
-    "GetSubscriptionInfo": Service.ENTERPRISE,
-    "GetCRMReport": Service.ENTERPRISE,
-    "SaveLicenseOrder": Service.ENTERPRISE,
-    "UpdateUserProfile": Service.ENTERPRISE,
-    "UpdateEnterpriseOffer": Service.ENTERPRISE,
-    "UpdateLicenseOrderStatus": Service.ENTERPRISE,
-    "ValidateGuestUserInCompany": Service.ENTERPRISE,
-    "ValidateURL": Service.ENTERPRISE,
-    "VerifyUniqueUser": Service.ENTERPRISE,
-    "ProcessURL": Service.ENTERPRISE,
-    "ListSalesPartner": Service.ENTERPRISE,
-    "IVR_ClickToCall": Service.ENTERPRISE,
-    "ABCRM_IVR_ClickToCall": Service.ENTERPRISE,
-    "CRMTrn_GetTopicForTrainingFeedback": Service.ENTERPRISE,
-    "CRMTrn_SaveTrainingFeedback": Service.ENTERPRISE,
-    "InAppFeedbackFromMobile": Service.ENTERPRISE,
-    "Save_Survey": Service.ENTERPRISE,
-    "support_SaveSupportTicket": Service.ENTERPRISE,
+    "GetCalculativeColumns": Service.REPORT,
+    "GetFavouriteReportMenu": Service.REPORT,
+    "GetGSTR": Service.REPORT,
+    "GetReportData": Service.REPORT,
+    "GetReportFilter": Service.REPORT,
+    "GetReportPrintExportDetailToExcel": Service.REPORT,
+    "GetReportPrintExportDetailToNotepad": Service.REPORT,
+    "GetReportPrintPDF": Service.REPORT,
+    "GetReportView": Service.REPORT,
+    "GetStockStatementForBank": Service.REPORT,
+    "GetUserReportColumn": Service.REPORT,
+    "GetVATReturn_MiddleEastJson": Service.REPORT,
+    "GetVoucerListForFilter": Service.REPORT,
+    "ListReportView": Service.REPORT,
+    "SaveCustomReport": Service.REPORT,
+    "SaveReportInFavourite": Service.REPORT,
+    "SaveUserReportCalculativeColumn": Service.REPORT,
+    "SaveUserReportColumn": Service.REPORT,
+    "SetAsDefaultView": Service.REPORT,
+    "UploadGSTR": Service.REPORT,
+
+    # ── ABUtilityService.svc (32 endpoints)
+    "ChangePassword": Service.UTILITY,
+    "ContactManagementSendEmailSMS": Service.UTILITY,
+    "DeleteFavouriteMenu": Service.UTILITY,
+    "GetCompanySelectionList": Service.UTILITY,
+    "GetCompleteCurrencyList": Service.UTILITY,
+    "GetDataForQuery": Service.UTILITY,
+    "GetDocumentPrint": Service.UTILITY,
+    "GetDocumentURLInfo": Service.UTILITY,
+    "GetFavouriteMenu": Service.UTILITY,
+    "GetFilterForQuery": Service.UTILITY,
+    "GetFinancialPeriodList": Service.UTILITY,
+    "GetLinkageParent": Service.UTILITY,
+    "GetMasterCode": Service.UTILITY,
+    "GetSampleDocumentPreview": Service.UTILITY,
+    "GetVideoLink": Service.UTILITY,
+    "GetVoucherNumber": Service.UTILITY,
+    "ICICINewAccountRequest": Service.UTILITY,
+    "PickPackSendEmailSMS": Service.UTILITY,
+    "QueryExecute": Service.UTILITY,
+    "ResendCommunication": Service.UTILITY,
+    "ResetCompanyStatic": Service.UTILITY,
+    "SaveFavouriteMenu": Service.UTILITY,
+    "SendForgotPasswordOTP": Service.UTILITY,
+    "SendReport": Service.UTILITY,
+    "SendVoucherEmail": Service.UTILITY,
+    "SendVoucherMailLink": Service.UTILITY,
+    "SendVoucherSMS": Service.UTILITY,
+    "SendWhatsAppMessage": Service.UTILITY,
+    "TextToSpeech": Service.UTILITY,
+    "UpdateCustomerRemark": Service.UTILITY,
+    "UpdateDefaultCompany": Service.UTILITY,
+    "ValidatePasswordPolicy": Service.UTILITY,
 }
 
-
-class VType:
-    """Document/voucher type codes (from AbMenuMaster enum in main.js)."""
-    SALES_ESTIMATE = 1
-    SALES_ORDER = 3
-    SALES_INVOICE = 4
-    DISPATCH = 5
-    SALES_RETURN = 6
-    DELIVERY_CHALLAN = 7
-    PURCHASE_ORDER = 16
-    PURCHASE_BILL = 18
-    GOODS_RECEIPT_NOTE = 20
-    PURCHASE_RETURN = 21
-    PURCHASE_CHALLAN = 22
-    PAYMENT_VOUCHER = 8
-    RECEIPT_VOUCHER = 9
-    JOURNAL_VOUCHER = 10
-    CONTRA_VOUCHER = 11
-    CREDIT_NOTE = 12
-    DEBIT_NOTE = 13
-    STOCK_TRANSFER = 23
-    STOCK_ADJUSTMENT = 24
-    MATERIAL_ADJUSTMENT = 25
-    PRODUCTION = 26
-    EXPENSE_JOURNAL = 27
-    PURCHASE_REQUISITION = 30
-
-
-class MasterType:
-    """Master type codes for ShortList calls."""
-    CUSTOMER = 1
-    VENDOR = 2
-    ITEM = 3
-    LEDGER = 4
-    ITEM_GROUP = 5
-    ITEM_CATEGORY = 6
-    ITEM_UNIT = 7
-    PARTY_CATEGORY = 8
-    LOCATION = 9
-    WAREHOUSE = 10
-    CURRENCY = 11
-    TAX_CODE = 12
-    BRAND = 14
-    AGENT = 15
-    SALES_EXECUTIVE = 16
-    TERRITORY = 17
-    PAYMENT_TERMS = 18
-    STATE = 19
-    COUNTRY = 20
-    CITY = 21
-    TRANSPORTER = 22
-    DOCUMENT_CATEGORY = 23
-    EMPLOYEE = 24
-    USER = 2037
-
-
-# Body key mapping for SaveUpdate endpoints
-# CRITICAL: Using wrong key causes "Object reference not set" errors
-SAVE_BODY_KEY: dict[str, str] = {
-    "SaveUpdate_Invoice": "invoice",
-    "SaveUpdate_Order": "info",
-    "SaveUpdate_Item": "item_information",
-    "SaveUpdate_Party": "info",
-    "SaveUpdate_Ledger": "info",
-    "SaveUpdate_JournalVoucher": "info",
-    "SaveUpdate_PaymentReceiptVoucher": "info",
-    "SaveUpdate_Estimate": "info",
-    "SaveUpdate_Challan": "info",
-    "SaveUpdate_MaterialAdjustment": "info",
-    "SaveUpdate_Jobwork": "info",
-    "SaveUpdate_InterBranch": "info",
-    "SaveUpdate_BOMBasedProduction": "info",
-    "SaveUpdate_ExpenseJournalVoucher": "info",
-    "SaveUpdate_PurchaseRequisition": "info",
-}
-
-
-# Indian states with GST state codes
+# ── Indian States GST codes ──────────────────────────────────────────────────
 INDIAN_STATES: dict[str, str] = {
-    "01": "Jammu & Kashmir",
-    "02": "Himachal Pradesh",
-    "03": "Punjab",
-    "04": "Chandigarh",
-    "05": "Uttarakhand",
-    "06": "Haryana",
-    "07": "Delhi",
-    "08": "Rajasthan",
-    "09": "Uttar Pradesh",
-    "10": "Bihar",
-    "11": "Sikkim",
-    "12": "Arunachal Pradesh",
-    "13": "Nagaland",
-    "14": "Manipur",
-    "15": "Mizoram",
-    "16": "Tripura",
-    "17": "Meghalaya",
-    "18": "Assam",
-    "19": "West Bengal",
-    "20": "Jharkhand",
-    "21": "Odisha",
-    "22": "Chhattisgarh",
-    "23": "Madhya Pradesh",
-    "24": "Gujarat",
-    "26": "Dadra & Nagar Haveli and Daman & Diu",
-    "27": "Maharashtra",
-    "28": "Andhra Pradesh (Old)",
-    "29": "Karnataka",
-    "30": "Goa",
-    "31": "Lakshadweep",
-    "32": "Kerala",
-    "33": "Tamil Nadu",
-    "34": "Puducherry",
-    "35": "Andaman & Nicobar Islands",
-    "36": "Telangana",
-    "37": "Andhra Pradesh",
-    "38": "Ladakh",
+    "01": "Jammu & Kashmir", "02": "Himachal Pradesh", "03": "Punjab",
+    "04": "Chandigarh", "05": "Uttarakhand", "06": "Haryana",
+    "07": "Delhi", "08": "Rajasthan", "09": "Uttar Pradesh",
+    "10": "Bihar", "11": "Sikkim", "12": "Arunachal Pradesh",
+    "13": "Nagaland", "14": "Manipur", "15": "Mizoram",
+    "16": "Tripura", "17": "Meghalaya", "18": "Assam",
+    "19": "West Bengal", "20": "Jharkhand", "21": "Odisha",
+    "22": "Chhattisgarh", "23": "Madhya Pradesh", "24": "Gujarat",
+    "26": "Dadra & Nagar Haveli and Daman & Diu", "27": "Maharashtra",
+    "28": "Andhra Pradesh (new)", "29": "Karnataka", "30": "Goa",
+    "31": "Lakshadweep", "32": "Kerala", "33": "Tamil Nadu",
+    "34": "Puducherry", "35": "Andaman & Nicobar Islands",
+    "36": "Telangana", "37": "Andhra Pradesh (old)", "38": "Ladakh",
+    "97": "Other Territory", "99": "Centre Jurisdiction",
+}
+
+# ── Save body key mapping ──────────────────────────────────────────────────
+# Some SaveUpdate_* endpoints use different body key than "info"
+SAVE_BODY_KEY: dict[str, str] = {
+    "SaveUpdate_Invoice":               "invoice",
+    "SaveUpdate_Order":                 "info",
+    "SaveUpdate_Item":                  "item_information",
+    "SaveUpdate_Party":                 "info",
+    "SaveUpdate_Ledger":                "info",
+    "SaveUpdate_JournalVoucher":        "info",
+    "SaveUpdate_PaymentReceiptVoucher": "info",
+    "SaveUpdate_Estimate":              "info",
+    "SaveUpdate_Challan":               "info",
+    "SaveUpdate_MaterialAdjustment":    "info",
+    "SaveUpdate_Jobwork":               "info",
+    "SaveUpdate_InterBranch":           "info",
+    "SaveUpdate_BOMBasedProduction":    "info",
+    "SaveUpdate_ExpenseJournalVoucher": "info",
+    "SaveUpdate_PurchaseRequisition":   "info",
 }
